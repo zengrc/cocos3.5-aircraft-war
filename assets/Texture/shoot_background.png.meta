@@ -1,0 +1,68 @@
+{
+  "ver": "1.0.22",
+  "importer": "image",
+  "imported": true,
+  "uuid": "16272124-ed74-4d6c-af5d-c650e2042606",
+  "files": [
+    ".png",
+    ".json"
+  ],
+  "subMetas": {
+    "shoot_background": {
+      "ver": "1.0.3",
+      "uuid": "cdb98beb-4199-4693-a5d5-6f7e88348ca0",
+      "rawTextureUuid": "16272124-ed74-4d6c-af5d-c650e2042606",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -11.5,
+      "offsetY": 2.5,
+      "trimX": 2,
+      "trimY": 2,
+      "width": 485,
+      "height": 2039,
+      "rawWidth": 512,
+      "rawHeight": 2048,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {},
+      "importer": "*",
+      "imported": false,
+      "files": [],
+      "userData": {},
+      "displayName": "",
+      "id": "",
+      "name": ""
+    },
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "16272124-ed74-4d6c-af5d-c650e2042606@6c48a",
+      "displayName": "shoot_background",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "repeat",
+        "wrapModeT": "repeat",
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0,
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "16272124-ed74-4d6c-af5d-c650e2042606"
+      },
+      "ver": "1.0.21",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "hasAlpha": true,
+    "type": "texture",
+    "redirect": "16272124-ed74-4d6c-af5d-c650e2042606@6c48a"
+  }
+}
