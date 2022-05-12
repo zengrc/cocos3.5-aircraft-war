@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, UITransform, director, Prefab, instantiate, random, Label } from 'cc';
+import { _decorator, Component, Node, UITransform, Prefab, instantiate, Label, director } from 'cc';
 import { EnemyController, Enemy_Type, Enemy_Config, Enemy_Event } from './EnemyController';
 const { ccclass, property } = _decorator;
 
@@ -36,6 +36,9 @@ export class GameManagement extends Component {
     public menu: Node | null = null;
 
     @property({ type: Node })
+    public mask: Node | null = null;
+
+    @property({ type: Node })
     public playground: Node | null = null;
 
     @property({ type: Node })
@@ -60,21 +63,28 @@ export class GameManagement extends Component {
         this._status = status;
         switch (status) {
             case GM_Status.start:
+                if (this.mask) this.mask.active = false;
                 if (this.menu) this.menu.active = true;
                 if (this.playground) this.playground.active = false;
+                this._score = 0;
                 break;
             case GM_Status.playing:
+                if (this.mask) this.mask.active = false;
                 if (this.menu) this.menu.active = false;
                 if (this.playground) this.playground.active = true;
                 this.updateScoreLabel();
                 this.schedule(this.generateEnemies, 2);
                 break;
             case GM_Status.resume:
-                if (director.isPaused) director.resume();
+                if (this.mask) this.mask.active = false;
+                director.resume();
+                break;
             case GM_Status.pause:
+                if (this.mask) this.mask.active = true;
                 director.pause();
                 break;
             case GM_Status.end:
+                if (this.mask) this.mask.active = false;
                 this.unschedule(this.generateEnemies);
                 break;
             default:
