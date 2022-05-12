@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Node, Vec3, UITransform, Sprite, SpriteFrame, Size } from 'cc';
+import { _decorator, Component, Node, Vec3, UITransform, BoxCollider2D, Sprite, Size, Animation } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -23,6 +23,9 @@ interface EnemyOpt {
 interface EnemyConfig {
     readonly spriteFrameName: string,
     readonly crashAnimateName: string,
+    readonly hitAnimateName: string,
+    readonly crashHit: number,
+    readonly score: number,
     readonly width: number,
     readonly height: number,
     readonly speed: number,
@@ -35,29 +38,42 @@ export enum Enemy_Type {
     UFO
 }
 
+export enum Enemy_Event {
+    crash= 'crash'
+}
+
 export const Enemy_Config: { readonly [key: number]: EnemyConfig } = {
     [Enemy_Type.plane]: {
         spriteFrameName: 'enemy1',
-        crashAnimateName: 'EnemyCrash1',
+        crashAnimateName: 'PlaneCrash',
+        hitAnimateName: '',
+        score: 1,
         width: 25,
         height: 20,
         speed: 120,
+        crashHit: 2,
         randomSpeedDiff: 50
     },
     [Enemy_Type.helicopter]: {
         spriteFrameName: 'enemy2',
-        crashAnimateName: 'EnemyCrash2',
+        crashAnimateName: 'HelicopterCrash',
+        hitAnimateName: 'HelicopterHit',
         width: 35,
+        score: 8,
         height: 45,
         speed: 80,
+        crashHit: 4,
         randomSpeedDiff: 20
     },
     [Enemy_Type.UFO]: {
         spriteFrameName: 'enemy3_n1',
-        crashAnimateName: 'EnemyCrash3',
+        crashAnimateName: 'UFOCrash',
+        hitAnimateName: 'UFOHit',
+        score: 20,
         width: 80,
         height: 120,
         speed: 50,
+        crashHit: 8,
         randomSpeedDiff: 0
     },
 }
@@ -74,10 +90,17 @@ export class EnemyController extends Component {
     private _parentH: number = 0;
     private _speed: number = 0;
     private _config: EnemyConfig | null = null;
+    private _animation: Animation | null = null;
+    private _boxCollider: BoxCollider2D | null = null;
+    private _curHit: number = 0;
+
+    public isCrash: boolean = false;
 
     start () {
-        this._sprite = this.getComponent(Sprite);
-        this._uiTransform = this.getComponent(UITransform);
+        this._sprite = this.node.getComponent(Sprite);
+        this._uiTransform = this.node.getComponent(UITransform);
+        this._animation = this.node.getComponent(Animation);
+        this._boxCollider = this.node.getComponent(BoxCollider2D);
         this.node.getPosition(this._pos);
         const uiTransform = this.node.parent.getComponent(UITransform);
         const { width, height } = uiTransform.contentSize;
@@ -93,10 +116,29 @@ export class EnemyController extends Component {
         this._speed = speed || 0;
     }
 
+    onHit() {
+        if (this.isCrash) return;
+        this._curHit += 1;
+        if (this._config.hitAnimateName && !this._animation.getState(this._config.hitAnimateName)?.isPlaying) {
+            this._animation.play(this._config.hitAnimateName);
+        }
+        if (this._animation && this._curHit >= this._config.crashHit) {
+            this.node.emit(Enemy_Event.crash, this._config.score);
+            this.isCrash = true;
+            this._animation.play(this._config.crashAnimateName);
+            this._animation.once(Animation.EventType.FINISHED, this.onCrashAniFinish, this);
+        }
+    }
+
+    onCrashAniFinish() {
+        this.node.destroy();
+    }
+
     setEnemy() {
         const config = Enemy_Config[this._type];
         this._config = { ...config, speed: this._speed || config.speed };
         if (this._uiTransform) this._uiTransform.setContentSize(new Size(this._config.width, this._config.height));
+        if (this._boxCollider) this._boxCollider.size = new Size(this._config.width, this._config.height);
         if (this._sprite) this._sprite.spriteFrame = this._sprite.spriteAtlas.spriteFrames[this._config.spriteFrameName];
         this._pos.y = this._parentH / 2 + this._config.height / 2;
         this._pos.x = this._iniPos;
@@ -104,6 +146,7 @@ export class EnemyController extends Component {
     }
 
     update (deltaTime: number) {
+        if (this.isCrash) return;
         const deltaY = deltaTime * this._config.speed;
         this._pos.y -= deltaY;
         this.node.setPosition(this._pos);

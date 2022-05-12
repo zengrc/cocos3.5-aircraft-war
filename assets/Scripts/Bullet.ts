@@ -34,8 +34,13 @@ export class Bullet extends Component {
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D, contact: IPhysics2DContact | null) {
-        otherCollider.node.destroy();
-        this.node.destroy();
+        if (otherCollider.node.name === 'Enemy') {
+            const enemyController = otherCollider.getComponent(EnemyController);
+            if (!enemyController.isCrash) {
+                this.node.destroy();
+                enemyController.onHit();
+            }
+        }
     }
 
     update (deltaTime: number) {
@@ -48,7 +53,6 @@ export class Bullet extends Component {
     checkDestory () {
         if (this._pos.x < -this._parentW / 2 || this._pos.x > this._parentW / 2
             || this._pos.y < -this._parentH / 2 || this._pos.y > this._parentH / 2) {
-                this.node.parent.removeChild(this.node);
                 this.node.destroy();
         }
     }

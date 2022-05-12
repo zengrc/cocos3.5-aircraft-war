@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Vec3, EventTouch, Input, UITransform, Prefab, instantiate, Sprite, SpriteAtlas, Node } from 'cc';
+import { _decorator, Animation, Component, Vec3, EventTouch, Contact2DType, Collider2D, Input, UITransform, Prefab, instantiate, Sprite, SpriteAtlas, Node } from 'cc';
 const { ccclass, property } = _decorator;
 
 /**
@@ -32,6 +32,8 @@ export class PlayerController extends Component {
     private _uiTransform: UITransform | null = null;
     private _bulletlLevel = Bullet_Level.normal;
     private _spriteAtlas: SpriteAtlas | null = null;
+    private _boxCollider: Collider2D | null = null;
+    private _animation: Animation | null = null;
 
     start () {
         this._pos.x = 0;
@@ -40,8 +42,20 @@ export class PlayerController extends Component {
         this.node.setPosition(this._pos);
         this._uiTransform = this.node.parent.getComponent(UITransform);
         this._spriteAtlas = this.node.getComponent(Sprite)?.spriteAtlas;
+        this._animation = this.node.getComponent(Animation);
         this.node.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+        this._boxCollider = this.node.getComponent(Collider2D);
+        this._boxCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
         this.startFire();
+    }
+
+    onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D) {
+        if (otherCollider.node.name === 'Enemy') {
+            this.node.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
+            this.cancelFire();
+            console.log(this._animation, 99999);
+            if (this._animation) this._animation.play('HeroCrash');
+        }
     }
 
     onTouchMove(event: EventTouch) {
