@@ -1,8 +1,9 @@
 
-import { _decorator, Component, Node, UITransform, Prefab, instantiate, Label, director } from 'cc';
+import { _decorator, Component, Node, UITransform, Prefab, instantiate, Label, director, EventTouch, Input } from 'cc';
+import { BonusController, BONUS_TYPE } from './BonusController';
 import { EnemyController, Enemy_Type, Enemy_Config, Enemy_Event } from './EnemyController';
 import { Hero_Event } from './PlayerController';
-import { PLAY_EVENT, GAME_EVENT } from './contant';
+import { PLAY_EVENT } from './contant';
 import { GameManagement } from './GameManagement';
 const { ccclass, property } = _decorator;
 
@@ -19,6 +20,14 @@ export class PlayManagement extends Component {
     private _playH: number = 0;
     private _scoreLabel: Label | null = null;
     private _gm: GameManagement | null;
+    
+    set _bombCount (val: number) {
+        if (this.BombCount) this.BombCount.string = `${val}`;
+    }
+
+    get _bombCount () {
+        return +this.BombCount?.string
+    }
 
     set _score (val: number) {
         if (this._gm) this._gm.score = val;
@@ -38,6 +47,12 @@ export class PlayManagement extends Component {
     public Enemy: Prefab | null = null;
 
     @property({ type: Node })
+    public BonusGroup: Node | null = null;
+
+    @property({ type: Prefab })
+    public Bonus: Prefab | null = null;
+
+    @property({ type: Node })
     public Score: Node | null = null;
 
     @property({ type: Node })
@@ -49,19 +64,30 @@ export class PlayManagement extends Component {
     @property({ type: Node })
     public PauseBtn: Node | null = null;
 
+    @property({ type: Node })
+    public BombBtn: Node | null = null;
+
+    @property({ type: Label })
+    public BombCount: Label | null;
+
     start () {
         this._gm = director.getScene().getChildByName('GameManagement')?.getComponent(GameManagement);
         this._score = 0;
+        this._bombCount = 0;
         this.switchPlayStatus(Play_Status.start);
         if (this.PauseBtn) {
             this.PauseBtn.on(PLAY_EVENT.PAUSE, this.pauseGame, this);
             this.PauseBtn.on(PLAY_EVENT.RESUME, this.resumeGame, this);
         }
-        if (this.Hero) this.Hero.on(Hero_Event.crash, this.gameOver, this);
+        if (this.Hero) {
+            this.Hero.on(Hero_Event.crash, this.gameOver, this);
+            this.Hero.on(Hero_Event.bonus, this.getBonus, this);
+        }
         const playgroundSize = this.Playground?.getComponent(UITransform)?.contentSize;
         const { width, height } = playgroundSize || {};
         this._playH = height || 0;
         this._playW = width || 0;
+        this.BombBtn?.on(Node.EventType.TOUCH_END, this.useBomb, this);
     }
 
     switchPlayStatus (status: Play_Status) {
@@ -71,6 +97,7 @@ export class PlayManagement extends Component {
             case Play_Status.start:
                 if (this.Mask) this.Mask.active = false;
                 this.updateScoreLabel();
+                this.schedule(this.generateBonus, 20);
                 this.schedule(this.generateEnemies, 2);
                 break;
             case Play_Status.pause:
@@ -98,6 +125,18 @@ export class PlayManagement extends Component {
         this.updateScoreLabel()
     }
 
+    generateBonus () {
+        if (this.Bonus) {
+            const randowmType = [BONUS_TYPE.doubleShoot, BONUS_TYPE.bomb][Math.floor(Math.random() * 2)];
+            const bonus = instantiate(this.Bonus);
+            const posRange = this._playW - bonus.getComponent(UITransform).contentSize.width;
+            const randomPos = Math.floor(Math.random() * posRange) - posRange / 2;
+            const controller = bonus.getComponent(BonusController);
+            controller.setBonus({ type: randowmType, pos: randomPos });
+            (this.BonusGroup || this.Playground).addChild(bonus);
+        }
+    }
+
     generateEnemies () {
         if (this.Enemy) {
             const randowmType = [Enemy_Type.UFO, Enemy_Type.plane, Enemy_Type.helicopter][Math.floor(Math.random() * 3)];
@@ -113,6 +152,10 @@ export class PlayManagement extends Component {
         }
     }
 
+    getBonus(type) {
+        if (type === BONUS_TYPE.bomb) this._bombCount += 1;
+    }
+
     pauseGame () {
         this.switchPlayStatus(Play_Status.pause);
     }
@@ -123,6 +166,13 @@ export class PlayManagement extends Component {
 
     gameOver () {
         this._gm?.gameOver();
+    }
+
+    useBomb () {
+        if (this._bombCount <= 0) return;
+        this.EnemyGroup?.children.forEach((enemy) => {
+            enemy.getComponent(EnemyController)?.onCrash();
+        });
     }
 }
 

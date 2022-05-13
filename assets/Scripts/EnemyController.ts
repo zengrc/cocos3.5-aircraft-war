@@ -123,11 +123,16 @@ export class EnemyController extends Component {
             this._animation.play(this._config.hitAnimateName);
         }
         if (this._animation && this._curHit >= this._config.crashHit) {
-            this.node.emit(Enemy_Event.crash, this._config.score);
-            this.isCrash = true;
-            this._animation.play(this._config.crashAnimateName);
-            this._animation.once(Animation.EventType.FINISHED, this.onCrashAniFinish, this);
+            this.onCrash();
         }
+    }
+
+    onCrash() {
+        if (this.isCrash) return;
+        this.isCrash = true;
+        this.node.emit(Enemy_Event.crash, this._config.score);
+        this._animation.play(this._config.crashAnimateName);
+        this._animation.once(Animation.EventType.FINISHED, this.onCrashAniFinish, this);
     }
 
     onCrashAniFinish() {

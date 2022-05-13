@@ -1,5 +1,6 @@
 
 import { _decorator, Animation, Component, Vec3, EventTouch, Contact2DType, Collider2D, Input, UITransform, Prefab, instantiate, Sprite, SpriteAtlas, Node } from 'cc';
+import { BonusController, BONUS_TYPE } from './BonusController';
 const { ccclass, property } = _decorator;
 
 /**
@@ -20,7 +21,8 @@ enum Bullet_Level {
 }
 
 export enum Hero_Event {
-    crash = 'crashed'
+    crash = 'crashed',
+    bonus = 'getBonus'
 }
  
 @ccclass('PlayerController')
@@ -56,7 +58,8 @@ export class PlayerController extends Component {
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D) {
-        if (!this._isCrash && otherCollider.node.name === 'Enemy') {
+        if (this._isCrash) return;
+        if (otherCollider.node.name === 'Enemy') {
             this.node.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
             this.cancelFire();
             this._isCrash = true;
@@ -66,6 +69,11 @@ export class PlayerController extends Component {
                     this.node.emit(Hero_Event.crash);
                 });
             }
+        } else if (otherCollider.node.name === 'Bonus') {
+            const controller = otherCollider.node.getComponent(BonusController);
+            if (controller.type === BONUS_TYPE.doubleShoot) this.switchToDoubleShoot();
+            this.node.emit(Hero_Event.bonus, controller.type);
+            otherCollider.node.destroy();
         }
     }
 
@@ -77,16 +85,37 @@ export class PlayerController extends Component {
         this.node.setPosition(this._pos);
     }
 
+    switchToDoubleShoot() {
+        this._bulletlLevel = Bullet_Level.double;
+        this.unschedule(this.switchToNormalShoot);
+        this.scheduleOnce(this.switchToNormalShoot, 10);
+    }
+
+    switchToNormalShoot() {
+        this._bulletlLevel = Bullet_Level.normal;
+    }
+
     fire() {
-        const bulletMap = {
-            [Bullet_Level.normal]: 'bullet1',
-            [Bullet_Level.double]: 'bullet2'
-        };
-        const bullet = instantiate(this.bullet);
-        const sprite = bullet.getComponent(Sprite);
-        if (this._spriteAtlas) sprite.spriteFrame = this._spriteAtlas.spriteFrames[bulletMap[this._bulletlLevel]];
-        bullet.setPosition(this._pos.x, this._pos.y + 50, 0);
-        (this.bulletGroup || this.node.parent).addChild(bullet);
+        if (this._bulletlLevel === Bullet_Level.normal) {
+            const bullet = instantiate(this.bullet);
+            const sprite = bullet.getComponent(Sprite);
+            if (this._spriteAtlas) sprite.spriteFrame = this._spriteAtlas.spriteFrames['bullet1'];
+            bullet.setPosition(this._pos.x, this._pos.y + 50, 0);
+            (this.bulletGroup || this.node.parent).addChild(bullet);
+        } else {
+            const bullet1 = instantiate(this.bullet);
+            const bullet2 = instantiate(this.bullet);
+            const sprite1 = bullet1.getComponent(Sprite);
+            const sprite2 = bullet2.getComponent(Sprite);
+            if (this._spriteAtlas) {
+                sprite1.spriteFrame = this._spriteAtlas.spriteFrames['bullet2'];
+                sprite2.spriteFrame = this._spriteAtlas.spriteFrames['bullet2'];
+            }
+            bullet1.setPosition(this._pos.x - 15, this._pos.y + 50, 0);
+            bullet2.setPosition(this._pos.x + 15, this._pos.y + 50, 0);
+            (this.bulletGroup || this.node.parent).addChild(bullet1);
+            (this.bulletGroup || this.node.parent).addChild(bullet2);
+        }
     }
 
     startFire() {
