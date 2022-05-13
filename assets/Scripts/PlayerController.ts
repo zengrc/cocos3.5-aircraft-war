@@ -18,6 +18,10 @@ enum Bullet_Level {
     normal,
     double
 }
+
+export enum Hero_Event {
+    crash = 'crashed'
+}
  
 @ccclass('PlayerController')
 export class PlayerController extends Component {
@@ -34,6 +38,7 @@ export class PlayerController extends Component {
     private _spriteAtlas: SpriteAtlas | null = null;
     private _boxCollider: Collider2D | null = null;
     private _animation: Animation | null = null;
+    private _isCrash: Boolean = false;
 
     start () {
         this._pos.x = 0;
@@ -43,6 +48,7 @@ export class PlayerController extends Component {
         this._uiTransform = this.node.parent.getComponent(UITransform);
         this._spriteAtlas = this.node.getComponent(Sprite)?.spriteAtlas;
         this._animation = this.node.getComponent(Animation);
+        this._animation?.play('HeroFlying');
         this.node.on(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
         this._boxCollider = this.node.getComponent(Collider2D);
         this._boxCollider.on(Contact2DType.BEGIN_CONTACT, this.onBeginContact, this);
@@ -50,16 +56,21 @@ export class PlayerController extends Component {
     }
 
     onBeginContact(selfCollider: Collider2D, otherCollider: Collider2D) {
-        if (otherCollider.node.name === 'Enemy') {
+        if (!this._isCrash && otherCollider.node.name === 'Enemy') {
             this.node.off(Input.EventType.TOUCH_MOVE, this.onTouchMove, this);
             this.cancelFire();
-            console.log(this._animation, 99999);
-            if (this._animation) this._animation.play('HeroCrash');
+            this._isCrash = true;
+            if (this._animation) {
+                this._animation.play('HeroCrash');
+                this._animation.once(Animation.EventType.FINISHED, () => {
+                    this.node.emit(Hero_Event.crash);
+                });
+            }
         }
     }
 
     onTouchMove(event: EventTouch) {
-        if (!this._uiTransform) return;
+        if (this._isCrash && !this._uiTransform) return;
         const newPos = event.getUILocation();
         const newPosLocal = this._uiTransform.convertToNodeSpaceAR(new Vec3(newPos.x, newPos.y, 0));
         this._pos = newPosLocal;

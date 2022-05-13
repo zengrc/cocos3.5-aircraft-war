@@ -1,6 +1,6 @@
 
-import { _decorator, Component, Node, Sprite, resources, SpriteFrame, Button, SpriteAtlas } from 'cc';
-import { GameManagement } from './GameManagement';
+import { _decorator, Component, Node, Sprite, Button, SpriteAtlas } from 'cc';
+import { PLAY_EVENT } from './contant';
 const { ccclass, property } = _decorator;
 
 /**
@@ -22,9 +22,6 @@ enum Btn_Status {
  
 @ccclass('PauseBtn')
 export class PauseBtn extends Component {
-
-    @property({ type: GameManagement })
-    GM: GameManagement | null = null;
 
     private _status: Btn_Status = Btn_Status.playing;
     private _btn: Button | null;
@@ -58,11 +55,11 @@ export class PauseBtn extends Component {
         if (this._status === Btn_Status.playing) {
             this._status = Btn_Status.pause;
             this.switchSpriteFrame();
-            setTimeout(() => this.GM.pauseGame(), 20);
+            this.node.emit(PLAY_EVENT.PAUSE);
         } else {
             this._status = Btn_Status.playing;
-            this.GM.resumeGame();
             this.switchSpriteFrame();
+            this.node.emit(PLAY_EVENT.RESUME);
         }
     }
 

@@ -1,7 +1,6 @@
 
-import { _decorator, Component, Node, UITransform, Prefab, instantiate, Label, director } from 'cc';
-import { EnemyController, Enemy_Type, Enemy_Config, Enemy_Event } from './EnemyController';
-const { ccclass, property } = _decorator;
+import { _decorator, Node, Component, director, game } from 'cc';
+const { ccclass } = _decorator;
 
 /**
  * Predefined variables
@@ -18,117 +17,53 @@ const { ccclass, property } = _decorator;
 enum GM_Status {
     start,
     playing,
-    pause,
-    resume,
     end
+}
+
+const SCENE_MAP = {
+    Game: 'Game',
+    Menu: 'Menu',
+    End: 'End'
 }
  
 @ccclass('GameManagement')
 export class GameManagement extends Component {
 
-    private _status: GM_Status;
-    private _playW: number = 0;
-    private _playH: number = 0;
-    private _score: number = 0;
-    private _scoreLabel: Label | null = null;
-
-    @property({ type: Node })
-    public menu: Node | null = null;
-
-    @property({ type: Node })
-    public mask: Node | null = null;
-
-    @property({ type: Node })
-    public playground: Node | null = null;
-
-    @property({ type: Node })
-    public enemyGroup: Node | null = null;
-
-    @property({ type: Prefab })
-    public enemy: Prefab | null = null;
-
-    @property({ type: Node })
-    public Score: Node | null = null;
+    public score: number = 0;
 
     start () {
-        this.switchGameStatus(GM_Status.start);
-        const playgroundSize = this.playground?.getComponent(UITransform)?.contentSize;
-        const { width, height } = playgroundSize || {};
-        this._playH = height || 0;
-        this._playW = width || 0;
+        game.addPersistRootNode(this.node);
     }
 
     switchGameStatus (status: GM_Status) {
-        if (this._status === status) return;
-        this._status = status;
         switch (status) {
             case GM_Status.start:
-                if (this.mask) this.mask.active = false;
-                if (this.menu) this.menu.active = true;
-                if (this.playground) this.playground.active = false;
-                this._score = 0;
+                this.score = 0;
+                director.loadScene(SCENE_MAP.Menu)
                 break;
             case GM_Status.playing:
-                if (this.mask) this.mask.active = false;
-                if (this.menu) this.menu.active = false;
-                if (this.playground) this.playground.active = true;
-                this.updateScoreLabel();
-                this.schedule(this.generateEnemies, 2);
-                break;
-            case GM_Status.resume:
-                if (this.mask) this.mask.active = false;
-                director.resume();
-                break;
-            case GM_Status.pause:
-                if (this.mask) this.mask.active = true;
-                director.pause();
+                this.score = 0;
+                director.loadScene(SCENE_MAP.Game)
                 break;
             case GM_Status.end:
-                if (this.mask) this.mask.active = false;
-                this.unschedule(this.generateEnemies);
+                director.loadScene(SCENE_MAP.End)
                 break;
             default:
                 break;
         }
     }
 
-    updateScoreLabel() {
-        if (!this.Score) return
-        if (!this._scoreLabel) this._scoreLabel = this.Score.getComponent(Label);
-        if (!this._scoreLabel) return;
-        this._scoreLabel.string = `${this._score}`;
-    }
-
-    onEnemyCrash(score) {
-        this._score += score;
-        this.updateScoreLabel()
-    }
-
-    generateEnemies () {
-        if (this.enemy) {
-            const randowmType = [Enemy_Type.UFO, Enemy_Type.plane, Enemy_Type.helicopter][Math.floor(Math.random() * 3)];
-            const enemyConfig = Enemy_Config[randowmType];
-            const posRange = this._playW - enemyConfig.width;
-            const randomPos = Math.floor(Math.random() * posRange) - posRange / 2;
-            const randomSpeed = Math.floor(Math.random() * enemyConfig.randomSpeedDiff * 2) - enemyConfig.randomSpeedDiff;
-            const enemy = instantiate(this.enemy);
-            enemy.on(Enemy_Event.crash, this.onEnemyCrash, this);
-            const controller = enemy.getComponent(EnemyController);
-            controller.setConfig({ type: randowmType, pos: randomPos, speed: randomSpeed + enemyConfig.speed });
-            (this.enemyGroup || this.playground).addChild(enemy);
-        }
+    toMenu () {
+        this.switchGameStatus(GM_Status.start);
     }
 
     startGame () {
+        console.log(123123123123);
         this.switchGameStatus(GM_Status.playing);
     }
 
-    pauseGame () {
-        this.switchGameStatus(GM_Status.pause);
-    }
-
-    resumeGame () {
-        this.switchGameStatus(GM_Status.resume);
+    gameOver () {
+        this.switchGameStatus(GM_Status.end);
     }
 }
 
