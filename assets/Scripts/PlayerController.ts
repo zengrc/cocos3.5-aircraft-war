@@ -1,6 +1,9 @@
 
-import { _decorator, Animation, Component, Vec3, EventTouch, Contact2DType, Collider2D, Input, UITransform, Prefab, instantiate, Sprite, SpriteAtlas, Node } from 'cc';
+import { _decorator, director, Animation, Component, Vec3, EventTouch, Contact2DType, Collider2D, Input, UITransform, Prefab, instantiate, Sprite, SpriteAtlas, Node } from 'cc';
 import { BonusController, BONUS_TYPE } from './BonusController';
+import { GameManagement } from './GameManagement';
+import { GAME_MUSIC } from './contant';
+import { AudioManagement } from './AudioManagement';
 const { ccclass, property } = _decorator;
 
 /**
@@ -41,8 +44,10 @@ export class PlayerController extends Component {
     private _boxCollider: Collider2D | null = null;
     private _animation: Animation | null = null;
     private _isCrash: Boolean = false;
+    private _gm: GameManagement | null;
 
     start () {
+        this._gm = director.getScene().getChildByName('GameManagement')?.getComponent(GameManagement);
         this._pos.x = 0;
         this._pos.y = -300;
         this._pos.z = 0;
@@ -67,6 +72,7 @@ export class PlayerController extends Component {
                 this._animation.play('HeroCrash');
                 this._animation.once(Animation.EventType.FINISHED, () => {
                     this.node.emit(Hero_Event.crash);
+                    this._gm?.getComponent(AudioManagement)?.playSound(GAME_MUSIC.CRASH_1);
                 });
             }
         } else if (otherCollider.node.name === 'Bonus') {
@@ -116,6 +122,7 @@ export class PlayerController extends Component {
             (this.bulletGroup || this.node.parent).addChild(bullet1);
             (this.bulletGroup || this.node.parent).addChild(bullet2);
         }
+        this._gm?.getComponent(AudioManagement)?.playSound(GAME_MUSIC.SHOT);
     }
 
     startFire() {

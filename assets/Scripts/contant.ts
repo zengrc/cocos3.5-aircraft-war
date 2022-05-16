@@ -9,3 +9,16 @@ export enum GAME_EVENT {
     PAUSE = 'PAUSE',
     RESUME = 'RESUME'
   }
+
+  export enum GAME_MUSIC {
+    BG = 'game_music',
+    SHOT = 'bullet',
+    CRASH_1 = 'enemy1_down',
+    CRASH_2 = 'enemy2_down',
+    CRASH_3 = 'enemy3_down',
+    UFO_FLYING = 'big_spaceship_flying',
+    GET_BOMB = 'get_bomb',
+    UPGRADE_DOUBLE_SHOT = 'get_double_laser',
+    USE_BOMB = 'use_bomb',
+    GAME_OVER = 'game_over',
+  }

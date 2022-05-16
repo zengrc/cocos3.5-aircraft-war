@@ -1,5 +1,8 @@
 
-import { _decorator, Component, Node, Vec3, UITransform, BoxCollider2D, Sprite, Size, Animation } from 'cc';
+import { _decorator, Component, Node, Vec3, UITransform, BoxCollider2D, Sprite, Size, Animation, director } from 'cc';
+import { GameManagement } from './GameManagement';
+import { GAME_MUSIC } from './contant';
+import { AudioManagement } from './AudioManagement';
 const { ccclass, property } = _decorator;
 
 /**
@@ -29,7 +32,8 @@ interface EnemyConfig {
     readonly width: number,
     readonly height: number,
     readonly speed: number,
-    readonly randomSpeedDiff: number
+    readonly randomSpeedDiff: number,
+    readonly crashSound: string,
 }
 
 export enum Enemy_Type {
@@ -47,6 +51,7 @@ export const Enemy_Config: { readonly [key: number]: EnemyConfig } = {
         spriteFrameName: 'enemy1',
         crashAnimateName: 'PlaneCrash',
         hitAnimateName: '',
+        crashSound: GAME_MUSIC.CRASH_1,
         score: 1,
         width: 25,
         height: 20,
@@ -58,6 +63,7 @@ export const Enemy_Config: { readonly [key: number]: EnemyConfig } = {
         spriteFrameName: 'enemy2',
         crashAnimateName: 'HelicopterCrash',
         hitAnimateName: 'HelicopterHit',
+        crashSound: GAME_MUSIC.CRASH_2,
         width: 35,
         score: 8,
         height: 45,
@@ -69,6 +75,7 @@ export const Enemy_Config: { readonly [key: number]: EnemyConfig } = {
         spriteFrameName: 'enemy3_n1',
         crashAnimateName: 'UFOCrash',
         hitAnimateName: 'UFOHit',
+        crashSound: GAME_MUSIC.CRASH_3,
         score: 20,
         width: 80,
         height: 120,
@@ -93,10 +100,12 @@ export class EnemyController extends Component {
     private _animation: Animation | null = null;
     private _boxCollider: BoxCollider2D | null = null;
     private _curHit: number = 0;
+    private _gm: GameManagement | null;
 
     public isCrash: boolean = false;
 
     start () {
+        this._gm = director.getScene().getChildByName('GameManagement')?.getComponent(GameManagement);
         this._sprite = this.node.getComponent(Sprite);
         this._uiTransform = this.node.getComponent(UITransform);
         this._animation = this.node.getComponent(Animation);
@@ -130,9 +139,10 @@ export class EnemyController extends Component {
     onCrash() {
         if (this.isCrash) return;
         this.isCrash = true;
-        this.node.emit(Enemy_Event.crash, this._config.score);
+        this.node.emit(Enemy_Event.crash, this._config.score, this._type);
         this._animation.play(this._config.crashAnimateName);
         this._animation.once(Animation.EventType.FINISHED, this.onCrashAniFinish, this);
+        this._gm?.getComponent(AudioManagement)?.playSound(this._config.crashSound);
     }
 
     onCrashAniFinish() {

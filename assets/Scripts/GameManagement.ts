@@ -1,5 +1,7 @@
 
 import { _decorator, Node, Component, director, game } from 'cc';
+import { AudioManagement } from './AudioManagement';
+import { GAME_MUSIC } from './contant';
 const { ccclass } = _decorator;
 
 /**
@@ -43,10 +45,13 @@ export class GameManagement extends Component {
                 break;
             case GM_Status.playing:
                 this.score = 0;
-                director.loadScene(SCENE_MAP.Game)
+                director.loadScene(SCENE_MAP.Game);
+                this.node.getComponent(AudioManagement)?.playMusic('bgm', GAME_MUSIC.BG);
                 break;
             case GM_Status.end:
-                director.loadScene(SCENE_MAP.End)
+                director.loadScene(SCENE_MAP.End);
+                this.node.getComponent(AudioManagement)?.stopAllMusic();
+                this.node.getComponent(AudioManagement)?.playSound(GAME_MUSIC.GAME_OVER);
                 break;
             default:
                 break;
@@ -58,7 +63,6 @@ export class GameManagement extends Component {
     }
 
     startGame () {
-        console.log(123123123123);
         this.switchGameStatus(GM_Status.playing);
     }
 

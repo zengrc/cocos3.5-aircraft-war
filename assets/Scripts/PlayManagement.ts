@@ -3,8 +3,9 @@ import { _decorator, Component, Node, UITransform, Prefab, instantiate, Label, d
 import { BonusController, BONUS_TYPE } from './BonusController';
 import { EnemyController, Enemy_Type, Enemy_Config, Enemy_Event } from './EnemyController';
 import { Hero_Event } from './PlayerController';
-import { PLAY_EVENT } from './contant';
+import { GAME_MUSIC, PLAY_EVENT } from './contant';
 import { GameManagement } from './GameManagement';
+import { AudioManagement } from './AudioManagement';
 const { ccclass, property } = _decorator;
 
 enum Play_Status {
@@ -20,6 +21,11 @@ export class PlayManagement extends Component {
     private _playH: number = 0;
     private _scoreLabel: Label | null = null;
     private _gm: GameManagement | null;
+    private _enemyCount = {
+        [Enemy_Type.plane]: 0,
+        [Enemy_Type.helicopter]: 0,
+        [Enemy_Type.UFO]: 0
+    }
     
     set _bombCount (val: number) {
         if (this.BombCount) this.BombCount.string = `${val}`;
@@ -120,11 +126,6 @@ export class PlayManagement extends Component {
         this._scoreLabel.string = `${this._score}`;
     }
 
-    onEnemyCrash(score) {
-        this._score += score;
-        this.updateScoreLabel()
-    }
-
     generateBonus () {
         if (this.Bonus) {
             const randowmType = [BONUS_TYPE.doubleShoot, BONUS_TYPE.bomb][Math.floor(Math.random() * 2)];
@@ -149,18 +150,39 @@ export class PlayManagement extends Component {
             const controller = enemy.getComponent(EnemyController);
             controller.setConfig({ type: randowmType, pos: randomPos, speed: randomSpeed + enemyConfig.speed });
             (this.EnemyGroup || this.Playground).addChild(enemy);
+            if (randowmType === Enemy_Type.UFO && this._enemyCount[randowmType] === 0) {
+                console.log('play big ship flying');
+                this._gm?.getComponent(AudioManagement).playMusic('UFO_flying', GAME_MUSIC.UFO_FLYING)
+            }
+            this._enemyCount[randowmType] += 1;
+        }
+    }
+
+    onEnemyCrash(score, type) {
+        this._score += score;
+        this.updateScoreLabel();
+        this._enemyCount[type] = this._enemyCount[type] - 1 < 0 ? 0 : this._enemyCount[type] - 1;
+        if (type === Enemy_Type.UFO && this._enemyCount[type] === 0) {
+            this._gm?.getComponent(AudioManagement).destroyMusic('UFO_flying');
         }
     }
 
     getBonus(type) {
-        if (type === BONUS_TYPE.bomb) this._bombCount += 1;
+        if (type === BONUS_TYPE.bomb) {
+            this._bombCount += 1;
+            this._gm?.getComponent(AudioManagement)?.playSound(GAME_MUSIC.GET_BOMB);
+        } else {
+            this._gm?.getComponent(AudioManagement)?.playSound(GAME_MUSIC.UPGRADE_DOUBLE_SHOT);
+        }
     }
 
     pauseGame () {
+        this._gm?.getComponent(AudioManagement)?.pauseAllMusic();
         this.switchPlayStatus(Play_Status.pause);
     }
 
     resumeGame () {
+        this._gm?.getComponent(AudioManagement)?.resumeAllMusic();
         this.switchPlayStatus(Play_Status.resume);
     }
 
@@ -170,6 +192,8 @@ export class PlayManagement extends Component {
 
     useBomb () {
         if (this._bombCount <= 0) return;
+        this._bombCount -= 1;
+        this._gm?.getComponent(AudioManagement)?.playSound(GAME_MUSIC.USE_BOMB);
         this.EnemyGroup?.children.forEach((enemy) => {
             enemy.getComponent(EnemyController)?.onCrash();
         });
