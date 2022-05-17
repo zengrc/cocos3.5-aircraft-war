@@ -1,0 +1,138 @@
+{
+    "importBase": "import",
+    "nativeBase": "native",
+    "name": "Audio",
+    "deps": [],
+    "uuids": [
+        "2e775356-9617-4a58-a601-1a7adef8bd09",
+        "2e82e2ef-8814-46ec-a25a-3a507be9bc05",
+        "5c748717-d7f5-4e46-95bd-8bfd584009dd",
+        "5dcd62b1-967a-417a-9151-ce8570f1b67d",
+        "669c675e-b1be-49f0-8535-b1f995d1a028",
+        "67c6cdab-5f71-457e-906f-2dac7c4d32da",
+        "88cc6ffe-b359-4b39-8c27-94a82307996f",
+        "9f1f85ef-9f2d-418e-b15e-d8dba6791170",
+        "c3315ea2-8c4b-4881-8cae-8937f190b9ba",
+        "d305abb9-15bc-4f35-9cac-b554f1691219",
+        "d7867cd8-76df-40f4-bb44-151313c107be",
+        "e6d5dba6-36fc-4b5f-b6c5-88429e0f0601",
+        "fa2a5342-4aab-4ea2-861f-27a4f468654d"
+    ],
+    "paths": {
+        "5dcd62b1-967a-417a-9151-ce8570f1b67d": [
+            "achievement",
+            "cc.AudioClip"
+        ],
+        "88cc6ffe-b359-4b39-8c27-94a82307996f": [
+            "big_spaceship_flying",
+            "cc.AudioClip"
+        ],
+        "9f1f85ef-9f2d-418e-b15e-d8dba6791170": [
+            "bullet",
+            "cc.AudioClip"
+        ],
+        "5c748717-d7f5-4e46-95bd-8bfd584009dd": [
+            "button",
+            "cc.AudioClip"
+        ],
+        "2e82e2ef-8814-46ec-a25a-3a507be9bc05": [
+            "enemy1_down",
+            "cc.AudioClip"
+        ],
+        "67c6cdab-5f71-457e-906f-2dac7c4d32da": [
+            "enemy2_down",
+            "cc.AudioClip"
+        ],
+        "e6d5dba6-36fc-4b5f-b6c5-88429e0f0601": [
+            "enemy3_down",
+            "cc.AudioClip"
+        ],
+        "2e775356-9617-4a58-a601-1a7adef8bd09": [
+            "game_music",
+            "cc.AudioClip"
+        ],
+        "d305abb9-15bc-4f35-9cac-b554f1691219": [
+            "game_over",
+            "cc.AudioClip"
+        ],
+        "d7867cd8-76df-40f4-bb44-151313c107be": [
+            "get_bomb",
+            "cc.AudioClip"
+        ],
+        "669c675e-b1be-49f0-8535-b1f995d1a028": [
+            "get_double_laser",
+            "cc.AudioClip"
+        ],
+        "fa2a5342-4aab-4ea2-861f-27a4f468654d": [
+            "out_porp",
+            "cc.AudioClip"
+        ],
+        "c3315ea2-8c4b-4881-8cae-8937f190b9ba": [
+            "use_bomb",
+            "cc.AudioClip"
+        ]
+    },
+    "scenes": {},
+    "packs": {},
+    "versions": {
+        "import": [
+            "2e775356-9617-4a58-a601-1a7adef8bd09",
+            "0f790",
+            "2e82e2ef-8814-46ec-a25a-3a507be9bc05",
+            "be6f3",
+            "5c748717-d7f5-4e46-95bd-8bfd584009dd",
+            "5f7d8",
+            "5dcd62b1-967a-417a-9151-ce8570f1b67d",
+            "527ac",
+            "669c675e-b1be-49f0-8535-b1f995d1a028",
+            "167cf",
+            "67c6cdab-5f71-457e-906f-2dac7c4d32da",
+            "5ed93",
+            "88cc6ffe-b359-4b39-8c27-94a82307996f",
+            "0543b",
+            "9f1f85ef-9f2d-418e-b15e-d8dba6791170",
+            "4876c",
+            "c3315ea2-8c4b-4881-8cae-8937f190b9ba",
+            "027a0",
+            "d305abb9-15bc-4f35-9cac-b554f1691219",
+            "bd6cf",
+            "d7867cd8-76df-40f4-bb44-151313c107be",
+            "91548",
+            "e6d5dba6-36fc-4b5f-b6c5-88429e0f0601",
+            "d2904",
+            "fa2a5342-4aab-4ea2-861f-27a4f468654d",
+            "8d46b"
+        ],
+        "native": [
+            "2e775356-9617-4a58-a601-1a7adef8bd09",
+            "3de42",
+            "2e82e2ef-8814-46ec-a25a-3a507be9bc05",
+            "828b5",
+            "5c748717-d7f5-4e46-95bd-8bfd584009dd",
+            "a0236",
+            "5dcd62b1-967a-417a-9151-ce8570f1b67d",
+            "59eb2",
+            "669c675e-b1be-49f0-8535-b1f995d1a028",
+            "2810c",
+            "67c6cdab-5f71-457e-906f-2dac7c4d32da",
+            "3b4ed",
+            "88cc6ffe-b359-4b39-8c27-94a82307996f",
+            "adb46",
+            "9f1f85ef-9f2d-418e-b15e-d8dba6791170",
+            "089ca",
+            "c3315ea2-8c4b-4881-8cae-8937f190b9ba",
+            "ab6c8",
+            "d305abb9-15bc-4f35-9cac-b554f1691219",
+            "e5058",
+            "d7867cd8-76df-40f4-bb44-151313c107be",
+            "8c06b",
+            "e6d5dba6-36fc-4b5f-b6c5-88429e0f0601",
+            "21e3a",
+            "fa2a5342-4aab-4ea2-861f-27a4f468654d",
+            "1b608"
+        ]
+    },
+    "redirect": [],
+    "debug": true,
+    "extensionMap": {}
+}
