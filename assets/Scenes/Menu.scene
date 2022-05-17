@@ -980,7 +980,7 @@
     "node": {
       "__id__": 10
     },
-    "_enabled": false,
+    "_enabled": true,
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
@@ -1032,11 +1032,11 @@
     "_isAbsBottom": true,
     "_isAbsHorizontalCenter": true,
     "_isAbsVerticalCenter": true,
-    "_originalWidth": 0,
-    "_originalHeight": 0,
+    "_originalWidth": 480,
+    "_originalHeight": 852,
     "_alignMode": 2,
     "_lockFlags": 0,
-    "_id": "5f53e0y0pI6LzEYThQDuWJ"
+    "_id": "4fnuc3TjJGXbrb6jnmw/Rj"
   },
   {
     "__type__": "cc.SceneGlobals",
