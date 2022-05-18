@@ -1,8 +1,8 @@
 
-import { _decorator, Node, Component, director, game } from 'cc';
+import { _decorator, Node, Component, director, game, Label } from 'cc';
 import { AudioManagement } from './AudioManagement';
 import { GAME_MUSIC } from './contant';
-const { ccclass } = _decorator;
+const { ccclass, property } = _decorator;
 
 /**
  * Predefined variables
@@ -31,13 +31,46 @@ const SCENE_MAP = {
 @ccclass('GameManagement')
 export class GameManagement extends Component {
 
+    @property({ type: Node })
+    ProcessBar: Node | null = null;
+
     public score: number = 0;
+    private _isPreloadFinish = false;
+    private _loadingProcess = {
+        audio: 0,
+        'game_scene': 0
+    };
 
     start () {
         game.addPersistRootNode(this.node);
+        const audioMgt = this.node.getComponent(AudioManagement);
+        if (audioMgt) {
+            audioMgt?.loadAudioSource((cur, total) => {
+                this.onResourceLoad('audio', cur, total);
+            });
+        }
+        director.preloadScene('Game', (cur, total) => {
+            if (this.ProcessBar) {
+                this.onResourceLoad('game_scene', cur, total);
+            }
+        }, (err) => {
+            if (err) console.error(err);
+        });
+    }
+
+    onResourceLoad(type, cur, total) {
+        this._loadingProcess[type] = Math.round(cur / total * 50);
+        const process = this._loadingProcess.audio + this._loadingProcess.game_scene;
+        this.ProcessBar.getComponent(Label).string = `${process}%`;
+        if (process >= 100) {
+            console.log('preload completed');
+            this._isPreloadFinish = true;
+            this.ProcessBar?.destroy();
+        }
     }
 
     switchGameStatus (status: GM_Status) {
+        if (!this._isPreloadFinish) return;
         switch (status) {
             case GM_Status.start:
                 this.score = 0;

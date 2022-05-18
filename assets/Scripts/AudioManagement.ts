@@ -24,12 +24,13 @@ export class AudioManagement extends Component {
     private _bundle: AssetManager.Bundle | null = null;
     private _audioMap: { [key: string]: AudioClip } = {};
 
-    onLoad () {
-        this._sourceMap['bg_sound'] = this.node.addComponent(AudioSource)
+    loadAudioSource (onLoad) {
+        this._sourceMap['bg_sound'] = this.node.addComponent(AudioSource);
         assetManager.loadBundle('Audio', (err, bundle) => {
             this._bundle = bundle;
-            console.log(this._bundle);
-            this._bundle.loadDir('/', AudioClip, (err, audioList) => {
+            this._bundle.loadDir('/', AudioClip, (cur, total) => {
+                onLoad(cur, total);
+            }, (err, audioList) => {
                 audioList.forEach((audio) => {
                     this._audioMap[audio.name] = audio;
                 });
@@ -55,6 +56,7 @@ export class AudioManagement extends Component {
     }
 
     destroyMusic (souceName) {
+        if (!this._sourceMap[souceName]) return; 
         this._sourceMap[souceName].stop();
         const audioSource = this._sourceMap[souceName];
         this._sourceMap[souceName] = undefined;
