@@ -1,7 +1,8 @@
 
-import { _decorator, Component, Node, director } from 'cc';
+import { _decorator, Component, Node, director, Label } from 'cc';
 const { ccclass, property } = _decorator;
 import { GameManagement } from './GameManagement';
+import { RESOURCE_LOAD_EVENT } from './contant';
 
 /**
  * Predefined variables
@@ -17,10 +18,24 @@ import { GameManagement } from './GameManagement';
  
 @ccclass('MenuManagement')
 export class MenuManagement extends Component {
+    @property({ type: Node })
+    ProcessBar: Node | null = null;
+
     private _gm: GameManagement | null;
 
     start () {
-        this._gm = director.getScene().getChildByName('GameManagement')?.getComponent(GameManagement);
+        const gmNode = director.getScene().getChildByName('GameManagement');
+        this._gm = gmNode?.getComponent(GameManagement);
+        gmNode.on(RESOURCE_LOAD_EVENT.PRELOAD, (process) => {
+            if (this.ProcessBar) {
+                this.ProcessBar.getComponent(Label).string = `${process}%`;
+                if (process >= 100) this.ProcessBar.destroy();
+            }
+        })
+    }
+
+    onResourceLoad (progress) {
+        this.ProcessBar.getComponent(Label).string = `${progress}%`;
     }
 
     startGame() {

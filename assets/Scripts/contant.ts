@@ -10,6 +10,10 @@ export enum GAME_EVENT {
     RESUME = 'RESUME'
   }
 
+  export enum RESOURCE_LOAD_EVENT {
+    PRELOAD = 'preload'
+  }
+
   export enum GAME_MUSIC {
     BG = 'game_music',
     SHOT = 'bullet',

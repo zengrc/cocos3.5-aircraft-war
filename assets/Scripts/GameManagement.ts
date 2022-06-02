@@ -1,7 +1,7 @@
 
-import { _decorator, Node, Component, director, game, Label } from 'cc';
+import { _decorator, Node, Component, director, game } from 'cc';
 import { AudioManagement } from './AudioManagement';
-import { GAME_MUSIC } from './contant';
+import { GAME_MUSIC, RESOURCE_LOAD_EVENT } from './contant';
 const { ccclass, property } = _decorator;
 
 /**
@@ -31,9 +31,6 @@ const SCENE_MAP = {
 @ccclass('GameManagement')
 export class GameManagement extends Component {
 
-    @property({ type: Node })
-    ProcessBar: Node | null = null;
-
     public score: number = 0;
     private _isPreloadFinish = false;
     private _loadingProcess = {
@@ -43,6 +40,7 @@ export class GameManagement extends Component {
 
     start () {
         game.addPersistRootNode(this.node);
+        this.onResourceLoad('init');
         const audioMgt = this.node.getComponent(AudioManagement);
         if (audioMgt) {
             audioMgt?.loadAudioSource((cur, total) => {
@@ -50,23 +48,25 @@ export class GameManagement extends Component {
             });
         }
         director.preloadScene('Game', (cur, total) => {
-            if (this.ProcessBar) {
-                this.onResourceLoad('game_scene', cur, total);
-            }
+            this.onResourceLoad('game_scene', cur, total);
         }, (err) => {
             if (err) console.error(err);
         });
     }
 
-    onResourceLoad(type, cur, total) {
-        this._loadingProcess[type] = Math.round(cur / total * 50);
+    onResourceLoad(type, cur?, total?) {
+        if (type === 'init') {
+            this._loadingProcess['audio'] = 0;
+            this._loadingProcess['game_scene'] = 0;
+        } else {
+            this._loadingProcess[type] = Math.round(cur / total * 50);
+        }
         const process = this._loadingProcess.audio + this._loadingProcess.game_scene;
-        this.ProcessBar.getComponent(Label).string = `${process}%`;
         if (process >= 100) {
             console.log('preload completed');
             this._isPreloadFinish = true;
-            this.ProcessBar?.destroy();
         }
+        this.node.emit(RESOURCE_LOAD_EVENT.PRELOAD, process);
     }
 
     switchGameStatus (status: GM_Status) {
